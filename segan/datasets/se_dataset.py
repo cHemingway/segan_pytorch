@@ -191,7 +191,10 @@ class SEDataset(Dataset):
             print('Loaded {} idx2slice items'.format(len(self.idx2slice)))
 
     def read_wav_file(self, wavfilename):
-        rate, wav = wavfile.read(wavfilename)
+        try:
+            rate, wav = wavfile.read(wavfilename)
+        except BaseException as e:
+            raise ValueError(f"Could not read file {wavfilename}") from e
         if self.preemph_norm:
             wav = pre_emphasize(wav, self.preemph)
             wav = normalize_wave_minmax(wav)
