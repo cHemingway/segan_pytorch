@@ -265,10 +265,12 @@ class SEDataset(Dataset):
                   ' {} and stride {}... >'.format(self.slice_size, self.stride))
         # Add progress bar. HACK: Using global variable!
         global g_pbar
-        g_pbar = tqdm(total = len(self.clean_names), disable= not verbose)
+        g_pbar = tqdm(total = len(self.clean_names) + len(self.noisy_names),
+                      mininterval = 0.5,    # Increase minimum update time to stop flickering 
+                      disable= not verbose) # Don't show if verbose=False
         # Time workers
         beg_t = timeit.default_timer()
-        # Create multiprocessing pool and clean workers
+        # Create multiprocessing pool and clean/noisy workers
         pool = mp.Pool(self.slice_workers)
         clean_args = [(self.clean_names[i], self.slice_size, self.stride) for \
                       i in range(len(self.clean_names))]
