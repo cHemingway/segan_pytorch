@@ -17,6 +17,7 @@ from ahoproc_tools.io import *
 from ahoproc_tools.interpolate import *
 import h5py
 
+from tqdm import tqdm
 
 def collate_fn(batch):
     # first we have utt bname, then tensors
@@ -57,6 +58,8 @@ def slice_signal(signal, window_sizes, stride=0.5):
     return slices
 
 def slice_index_helper(args):
+    global g_pbar
+    g_pbar.update()
     return slice_signal_index(*args)
 
 def slice_signal_index(path, window_size, stride):
@@ -257,7 +260,12 @@ class SEDataset(Dataset):
         if verbose:
             print('< Slicing all signals with window'
                   ' {} and stride {}... >'.format(self.slice_size, self.stride))
+        # Add progress bar. HACK: Using global variable!
+        global g_pbar
+        g_pbar = tqdm(total = len(self.clean_names), disable= not verbose)
+        # Time workers
         beg_t = timeit.default_timer()
+        # Create multiprocessing pool and clean workers
         pool = mp.Pool(self.slice_workers)
         clean_args = [(self.clean_names[i], self.slice_size, self.stride) for \
                       i in range(len(self.clean_names))]
