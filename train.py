@@ -97,6 +97,12 @@ def main(opts):
                 opts.save_freq,
                 va_dloader=va_dloader, device=device)
 
+    # Report maximum memory used
+    print("Max memory used: {}, cached: {}".format(
+        torch.cuda.max_memory_allocated(),
+        torch.cuda.max_memory_cached()
+    ))
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

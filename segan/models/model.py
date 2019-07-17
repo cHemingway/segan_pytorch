@@ -76,6 +76,8 @@ class SEGAN(Model):
         super(SEGAN, self).__init__(name)
         self.save_path = opts.save_path
         self.preemph = opts.preemph
+        # For inference, we are not given reg loss, but don't need it either
+        # Therefore set default to None
         self.reg_loss = getattr(F, opts.reg_loss, None)
         if generator is None:
             # Build G and D
@@ -367,6 +369,14 @@ class SEGAN(Model):
                                               iteration, bins='sturges')
                     self.writer.add_histogram('noisy', noisy.cpu().data,
                                               iteration, bins='sturges')
+
+                    # Log Memory usage
+                    self.writer.add_scalars('CUDA Memory', {
+                            'memory_allocated': torch.cuda.memory_allocated(),
+                            'memory_cached': torch.cuda.memory_cached()
+                        },
+                        global_step=iteration
+                    )
                     # get D and G weights and plot their norms by layer and
                     # global
                     def model_weights_norm(model, total_name):
