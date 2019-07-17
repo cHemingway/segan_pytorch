@@ -99,8 +99,8 @@ def main(opts):
 
     # Report maximum memory used
     print("Max memory used: {}, cached: {}".format(
-        torch.cuda.max_memory_allocated(),
-        torch.cuda.max_memory_cached()
+        torch.cuda.max_memory_allocated(device=device),
+        torch.cuda.max_memory_cached(device=device)
     ))
 
 

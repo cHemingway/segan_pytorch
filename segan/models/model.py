@@ -372,8 +372,8 @@ class SEGAN(Model):
 
                     # Log Memory usage
                     self.writer.add_scalars('CUDA Memory', {
-                            'memory_allocated': torch.cuda.memory_allocated(),
-                            'memory_cached': torch.cuda.memory_cached()
+                            'memory_allocated': torch.cuda.memory_allocated(device=device),
+                            'memory_cached': torch.cuda.memory_cached(device=device)
                         },
                         global_step=iteration
                     )
