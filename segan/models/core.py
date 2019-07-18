@@ -8,7 +8,7 @@ import os
 import math
 import json
 
-import tqdm
+from tqdm import tqdm
 
 class Saver(object):
 
