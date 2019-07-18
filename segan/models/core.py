@@ -8,6 +8,8 @@ import os
 import math
 import json
 
+import tqdm
+
 class Saver(object):
 
     def __init__(self, model, save_path, max_ckpts=5, optimizer=None, prefix=''):
@@ -43,12 +45,12 @@ class Saver(object):
             if self.max_ckpts is not None:
                 if len(latest) > self.max_ckpts:
                     try:
-                        print('Removing old ckpt {}'.format(os.path.join(save_path, 
+                        tqdm.write('Removing old ckpt {}'.format(os.path.join(save_path, 
                                                             'weights_' + todel)))
                         os.remove(os.path.join(save_path, 'weights_' + todel))
                         latest = latest[1:] 
                     except FileNotFoundError:
-                        print('ERROR: ckpt is not there?')
+                        tqdm.write('ERROR: ckpt is not there?')
 
         latest += [model_path]
 

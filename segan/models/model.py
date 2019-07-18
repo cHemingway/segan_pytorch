@@ -23,6 +23,8 @@ import os
 from torch import autograd
 from scipy import signal
 
+from tqdm import tqdm, trange
+
 
 # custom weights initialization called on netG and netD
 def weights_init(m):
@@ -266,11 +268,11 @@ class SEGAN(Model):
         label = torch.ones(opts.batch_size)
         label = label.to(device)
 
-        for epoch in range(1, opts.epoch + 1):
+        for epoch in trange(1, opts.epoch + 1, desc="Total progress", unit="Epoch"):
             beg_t = timeit.default_timer()
             self.G.train()
             self.D.train()
-            for bidx, batch in enumerate(dloader, start=1):
+            for bidx, batch in enumerate(tqdm(dloader, desc="Epoch progress",unit='Batch'), start=1):
                 if epoch >= l1_dec_epoch:
                     if l1_weight > 0:
                         l1_weight -= l1_dec_step
@@ -328,7 +330,7 @@ class SEGAN(Model):
                     # capture sample now that we know shape after first
                     # inference
                     z_sample = self.G.z[:20, :, :].contiguous()
-                    print('z_sample size: ', z_sample.size())
+                    tqdm.write('z_sample size: ' + repr(z_sample.size()))
                     z_sample = z_sample.to(device)
                 if bidx % log_freq == 0 or bidx >= len(dloader):
                     d_real_loss_v = d_real_loss.cpu().item()
@@ -353,7 +355,9 @@ class SEGAN(Model):
                             torch.cuda.memory_allocated() / (1024 * 1024),
                             torch.cuda.memory_cached() / (1024*1024))
 
-                    print(log)
+                    tqdm.write(log)
+
+                    # Add values to Tensorboard log
                     self.writer.add_scalar('D_real', d_real_loss_v,
                                            iteration)
                     self.writer.add_scalar('D_fake', d_fake_loss_v,
@@ -375,7 +379,7 @@ class SEGAN(Model):
                     self.writer.add_histogram('noisy', noisy.cpu().data,
                                               iteration, bins='sturges')
 
-                    # Log Memory usage
+                    # Log Memory usage to Tensorboard
                     self.writer.add_scalars('CUDA Memory', {
                             'memory_allocated': torch.cuda.memory_allocated(),
                             'memory_cached': torch.cuda.memory_cached()
@@ -430,7 +434,7 @@ class SEGAN(Model):
                 self.writer.add_scalar('Genh-val_obj',
                                        val_obj, epoch)
                 if val_obj > best_val_obj:
-                    print('Val obj (COVL + SSNR + PESQ) improved '
+                    tqdm.write('Val obj (COVL + SSNR + PESQ) improved '
                           '{} -> {}'.format(best_val_obj,
                                             val_obj))
                     best_val_obj = val_obj
@@ -440,7 +444,7 @@ class SEGAN(Model):
                     self.D.save(self.save_path, iteration, True)
                 else:
                     patience -= 1
-                    print('Val loss did not improve. Patience'
+                    tqdm.write('Val loss did not improve. Patience'
                           '{}/{}'.format(patience,
                                          opts.patience))
                     if patience <= 0:
