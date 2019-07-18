@@ -348,6 +348,11 @@ class SEGAN(Model):
                                      l1_weight, 
                                      timings[-1],
                                      np.mean(timings))
+
+                    log += ' CUDA (MiB): {:.2f} Alloc, {:.2f} Cache'.format(
+                            torch.cuda.memory_allocated() / (1024 * 1024),
+                            torch.cuda.memory_cached() / (1024*1024))
+
                     print(log)
                     self.writer.add_scalar('D_real', d_real_loss_v,
                                            iteration)
@@ -372,8 +377,8 @@ class SEGAN(Model):
 
                     # Log Memory usage
                     self.writer.add_scalars('CUDA Memory', {
-                            'memory_allocated': torch.cuda.memory_allocated(device=device),
-                            'memory_cached': torch.cuda.memory_cached(device=device)
+                            'memory_allocated': torch.cuda.memory_allocated(),
+                            'memory_cached': torch.cuda.memory_cached()
                         },
                         global_step=iteration
                     )
