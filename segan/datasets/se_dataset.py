@@ -16,6 +16,7 @@ import librosa
 from ahoproc_tools.io import *
 from ahoproc_tools.interpolate import *
 import h5py
+from sklearn import preprocessing
 
 from tqdm import tqdm
 
@@ -197,9 +198,10 @@ class SEDataset(Dataset):
             raise ValueError(f"Could not read file {wavfilename}") from e
         if self.preemph_norm:
             wav = pre_emphasize(wav, self.preemph)
-            wav = normalize_wave_minmax(wav)
+            # Use scikit to normalize (0 mean, std dev = 1)
+            wav = preprocessing.scale(wav.astype('float'))
         else:
-            wav = normalize_wave_minmax(wav)
+            wav = preprocessing.scale(wav.astype('float'))
             wav = pre_emphasize(wav, self.preemph)
         return rate, wav
 
