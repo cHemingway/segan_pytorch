@@ -20,6 +20,7 @@ from .discriminator import *
 from .core import *
 import json
 import os
+from datetime import datetime
 from torch import autograd
 from scipy import signal
 
@@ -233,11 +234,14 @@ class SEGAN(Model):
 
     def train(self, opts, dloader, criterion, l1_init, l1_dec_step,
               l1_dec_epoch, log_freq, va_dloader=None,
-              device='cpu'):
+              device='cpu',log_name=None):
         """ Train the SEGAN """
 
         # create writer
-        self.writer = SummaryWriter(os.path.join(self.save_path, 'train'))
+        if log_name == None:
+            log_name = datetime.now().strftime("%H:%M:%S %d/%m/%y")
+        self.writer = SummaryWriter(os.path.join(self.save_path, 
+                                    'tensorboard_logs/{}').format(log_name))
 
         # Build the optimizers
         Gopt, Dopt = self.build_optimizers(opts)
@@ -358,34 +362,20 @@ class SEGAN(Model):
                     tqdm.write(log)
 
                     # Add values to Tensorboard log
-                    self.writer.add_scalar('D_real', d_real_loss_v,
+                    self.writer.add_scalar('loss/D_real', d_real_loss_v,
                                            iteration)
-                    self.writer.add_scalar('D_fake', d_fake_loss_v,
+                    self.writer.add_scalar('loss/D_fake', d_fake_loss_v,
                                            iteration)
-                    self.writer.add_scalar('G_adv', g_adv_loss_v,
+                    self.writer.add_scalar('loss/G_adv', g_adv_loss_v,
                                            iteration)
-                    self.writer.add_scalar('G_l1', g_l1_loss_v,
+                    self.writer.add_scalar('loss/G_l1', g_l1_loss_v,
                                            iteration)
-                    self.writer.add_histogram('D_fake__hist', d_fake_.cpu().data,
-                                              iteration, bins='sturges')
-                    self.writer.add_histogram('D_fake_hist', d_fake.cpu().data,
-                                              iteration, bins='sturges')
-                    self.writer.add_histogram('D_real_hist', d_real.cpu().data,
-                                              iteration, bins='sturges')
-                    self.writer.add_histogram('Gz', Genh.cpu().data,
-                                              iteration, bins='sturges')
-                    self.writer.add_histogram('clean', clean.cpu().data,
-                                              iteration, bins='sturges')
-                    self.writer.add_histogram('noisy', noisy.cpu().data,
-                                              iteration, bins='sturges')
+                    
+                    #FIXME TensorboardX Histograms do not work! 
 
-                    # Log Memory usage to Tensorboard
-                    self.writer.add_scalars('CUDA Memory', {
-                            'memory_allocated': torch.cuda.memory_allocated(),
-                            'memory_cached': torch.cuda.memory_cached()
-                        },
-                        global_step=iteration
-                    )
+                    # Get invalid pointer for free() error, possible library version issue
+                    # https://github.com/pytorch/pytorch/issues/19739#issuecomment-497004821
+                    
                     # get D and G weights and plot their norms by layer and
                     # global
                     def model_weights_norm(model, total_name):
@@ -394,15 +384,15 @@ class SEGAN(Model):
                             if 'weight' in k:
                                 W = v.data
                                 W_norm = torch.norm(W)
-                                self.writer.add_scalar('{}_Wnorm'.format(k),
+                                self.writer.add_scalar('{}_Wnorm/{}'.format(total_name,k),
                                                        W_norm,
                                                        iteration)
                                 total_GW_norm += W_norm
-                        self.writer.add_scalar('{}_Wnorm'.format(total_name),
+                        self.writer.add_scalar('{}total/Wnorm'.format(total_name),
                                                total_GW_norm,
                                                iteration)
-                    model_weights_norm(self.G, 'Gtotal')
-                    model_weights_norm(self.D, 'Dtotal')
+                    model_weights_norm(self.G, 'G')
+                    model_weights_norm(self.D, 'D')
                     if not opts.no_train_gen:
                         #canvas_w = self.G(noisy_samples, z=z_sample)
                         self.gen_train_samples(clean_samples, noisy_samples,
