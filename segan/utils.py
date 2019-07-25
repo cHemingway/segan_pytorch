@@ -336,7 +336,7 @@ def PESQ(ref_wav, deg_wav):
     curr_dir = os.getcwd()
     # Write both to tmp files and then eval with pesqmain
     try:
-        p = run(['pesqmain'.format(curr_dir), 
+        p = run(['{}/pesq'.format(curr_dir), 
                  ref_tfl, deg_tfl, '+16000', '+wb'],
                 stdout=PIPE, 
                 encoding='ascii')
@@ -419,11 +419,13 @@ def CompositeEval(ref_wav, deg_wav, log_all=False):
     segSNR = np.mean(segsnr_mean)
 
     # Compute the PESQ
-    pesq_raw = PESQ(ref_wav, deg_wav)
-    if 'error!' not in pesq_raw:
-        pesq_raw = float(pesq_raw)
-    else:
-        pesq_raw = -1.
+    # TODO FIX PESQ
+    # pesq_raw = PESQ(ref_wav, deg_wav)
+    pesq_raw = -1.
+    # if 'error!' not in pesq_raw:
+    #     pesq_raw = float(pesq_raw)
+    # else:
+    #     pesq_raw = -1.
 
     def trim_mos(val):
         return min(max(val, 1), 5)
