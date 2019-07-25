@@ -247,7 +247,7 @@ class SEGAN(Model):
 
         # create writer
         if log_name == None:
-            log_name = datetime.now().strftime("%H:%M:%S %d/%m/%y")
+            log_name = datetime.now().strftime("%H:%M:%S %d:%m:%y")
         self.writer = SummaryWriter(os.path.join(self.save_path, 
                                     'tensorboard_logs/{}').format(log_name))
 
@@ -417,7 +417,7 @@ class SEGAN(Model):
                         if k not in noisy_evals:
                             noisy_evals[k] = []
                         noisy_evals[k] += v
-                        self.writer.add_scalar('noisy-{}'.format(k), 
+                        self.writer.add_scalar('noisy_validation/{}'.format(k), 
                                                noisy_evals[k][-1], epoch)
                 else:
                     evals_ = self.evaluate(opts, va_dloader, 
