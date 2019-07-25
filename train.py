@@ -105,6 +105,10 @@ def main(opts):
 
 
 if __name__ == '__main__':
+    # See https://github.com/microsoft/ptvsd/blob/master/TROUBLESHOOTING.md#1-multiprocessing-on-linuxmac
+    import multiprocessing
+    multiprocessing.set_start_method('spawn', True)
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_path', type=str, default="seganv1_ckpt",
                         help="Path to save models (Def: seganv1_ckpt).")

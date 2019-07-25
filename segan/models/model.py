@@ -26,6 +26,7 @@ from scipy import signal
 
 from tqdm import tqdm, trange
 
+import ptvsd
 
 # custom weights initialization called on netG and netD
 def weights_init(m):
@@ -236,6 +237,13 @@ class SEGAN(Model):
               l1_dec_epoch, log_freq, va_dloader=None,
               device='cpu',log_name=None):
         """ Train the SEGAN """
+
+        
+        # 5678 is the default attach port in the VS Code debug configurations
+        # print("Waiting for debugger attach")
+        # ptvsd.enable_attach(address=('localhost', 5678), redirect_output=True)
+        # ptvsd.wait_for_attach()
+        # breakpoint()
 
         # create writer
         if log_name == None:
