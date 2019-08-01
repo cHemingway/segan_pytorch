@@ -59,8 +59,10 @@ def slice_signal(signal, window_sizes, stride=0.5):
     return slices
 
 def slice_index_helper(args):
-    global g_pbar
-    g_pbar.update()
+    # HACK: Remove progress bar as breaks when changing to 
+    # multiprocessing.set_start_method('spawn', True)
+    # global g_pbar
+    # g_pbar.update()
     return slice_signal_index(*args)
 
 def slice_signal_index(path, window_size, stride):
